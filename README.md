@@ -33,12 +33,13 @@ Other OS (windows, linux) should install from source found at http://nodejs.org
 
 ## configure
 
-Nothing yet
+concurrency is the number of simultaneous api requests sent to reddit.
 
 ## options
 
 - user: reddit uername
 - pass: reddit password
 - v: verbosity (`-vvv` to increase)
+- c: concurrent requests
 
 LICENSE: MIT
