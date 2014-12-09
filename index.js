@@ -23,6 +23,7 @@ cmd
 	.option('-u, --user [string]', 'Username for reddit')
 	.option('-p, --pass [string]', 'Password for reddit')
 	.option('-t, --throttle [n]', 'Number of minutes between submissions', cfg.throttle)
+	.option('-c, --concurrent [n]', 'Number of concurrent api requests', cfg.concurrent)
 	.option('-v, --verbose', 'A value that can be increased', increaseVerbosity, 0)
 	.parse(process.argv);
 
@@ -73,6 +74,8 @@ function deleteComment(comment){
 }
 
 function start(){
+	if ( cmd.verbose ) logger.log('info', 'Starting with %d concurrency', cmd.concurrent);
+
 	reddit.login({
 		username: cmd.user,
 		password: cmd.pass
@@ -86,7 +89,7 @@ function start(){
 		.then(function(comments){
 			var def = q.defer();
 
-			async.eachLimit(comments, 1, function(comment, cb){
+			async.eachLimit(comments, cmd.concurrent, function(comment, cb){
 				eraseComment(comment)
 					.then(function(data){
 						data = data && data.json;
@@ -101,14 +104,14 @@ function start(){
 							}
 						}
 
-						logger.log('info', 'erased comment name: %s', comment.data.name);
+						if ( cmd.verbose ) logger.log('info', 'erased comment name: %s', comment.data.name);
 
 						return data.data.things[0];
 					})
 					.then(function(comment){
 						deleteComment(comment)
 							.then(function(data){
-								logger.log('info', 'deleted comment id: %s', comment.data.id);
+								if ( cmd.verbose ) logger.log('info', 'deleted comment id: %s', comment.data.id);
 
 								cb();
 							});
@@ -122,7 +125,7 @@ function start(){
 					return def.reject(err);
 				}
 
-				if ( cmd.verbose ) logger.log('info', 'Done submitting links');
+				if ( cmd.verbose ) logger.log('info', 'Done erasing and deleting comments');
 
 				def.resolve();
 			});
@@ -130,7 +133,7 @@ function start(){
 			return def.promise;
 		})
 		.then(function(data){
-			if ( cmd.verbose ) logger.log('info', 'Done with all submissions.');
+			if ( cmd.verbose ) logger.log('info', 'Done with all tasks.');
 		})
 		.catch(function(err){
 			logger.error(err);
