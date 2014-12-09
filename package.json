@@ -1,0 +1,29 @@
+{
+  "name": "reddit-eraser",
+  "version": "0.0.1",
+  "description": "Erase your reddit comment history (then delete them).",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "reddit",
+    "rss",
+    "links",
+    "submit",
+    "submission",
+    "seo"
+  ],
+  "author": "Anthony Ettinger (chovy)",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^0.9.0",
+    "commander": "^2.5.0",
+    "moment": "^2.8.4",
+    "q": "^1.1.2",
+    "request-promise": "^0.3.2",
+    "snoocore": "^2.0.1",
+    "winston": "^0.8.3"
+  },
+  "devDependencies": {}
+}
