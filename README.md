@@ -16,6 +16,9 @@ Other OS (windows, linux) should install from source found at http://nodejs.org
     cd reddit-eraser
     npm install
     
+    # copy config
+    cp config.sample.json config.json
+    
     # run from command line
     ./index.js -u username -p password
 
