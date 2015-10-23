@@ -73,6 +73,38 @@ function deleteComment(comment){
 	});
 }
 
+function eraseAndDeleteComment(comment, cb){
+	eraseComment(comment)
+	.then(function(data){
+		data = data && data.json;
+
+		if ( data ) {
+			if ( data.errors && data.errors[0] ) {
+				if (data.errors[0][0] === 'QUOTA_FILLED') {
+					logger.log('warn', data.errors[0].join(' '));
+				}
+			} else if ( data.ratelimit ) {
+				logger.log('warn', 'rate limit hit: try again in %s mins', data.ratelimit/60);
+			}
+		}
+
+		if ( cmd.verbose ) logger.log('info', 'erased comment name: %s', comment.data.name);
+
+		return data.data.things[0];
+	})
+	.then(function(comment){
+		deleteComment(comment)
+		.then(function(data){
+			if ( cmd.verbose ) logger.log('info', 'deleted comment id: %s', comment.data.id);
+
+			cb();
+		});
+	})
+	.catch(function(err){
+		cb(err);
+	});
+}
+
 function start(){
 	if ( cmd.verbose ) logger.log('info', 'Starting with %d concurrency', cmd.concurrent);
 
@@ -89,37 +121,7 @@ function start(){
 		.then(function(comments){
 			var def = q.defer();
 
-			async.eachLimit(comments, cmd.concurrent, function(comment, cb){
-				eraseComment(comment)
-					.then(function(data){
-						data = data && data.json;
-
-						if ( data ) {
-							if ( data.errors && data.errors[0] ) {
-								if (data.errors[0][0] === 'QUOTA_FILLED') {
-									logger.log('warn', data.errors[0].join(' '));
-								}
-							} else if ( data.ratelimit ) {
-								logger.log('warn', 'rate limit hit: try again in %s mins', data.ratelimit/60);
-							}
-						}
-
-						if ( cmd.verbose ) logger.log('info', 'erased comment name: %s', comment.data.name);
-
-						return data.data.things[0];
-					})
-					.then(function(comment){
-						deleteComment(comment)
-							.then(function(data){
-								if ( cmd.verbose ) logger.log('info', 'deleted comment id: %s', comment.data.id);
-
-								cb();
-							});
-					})
-					.catch(function(err){
-						cb(err);
-					});
-			}, function(err){
+			async.eachLimit(comments, cmd.concurrent, eraseAndDeleteComment, function(err){
 				if ( err ) {
 					logger.error(err);
 					return def.reject(err);

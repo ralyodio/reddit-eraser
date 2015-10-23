@@ -1,6 +1,6 @@
 {
   "name": "reddit-eraser",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Erase your reddit comment history (then delete them).",
   "main": "index.js",
   "scripts": {
