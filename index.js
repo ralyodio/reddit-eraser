@@ -3,7 +3,6 @@
 var Snoocore = require('snoocore');
 var cfg = require('./config.json');
 var cmd = require('commander');
-var reddit = new Snoocore({ userAgent: 'reddit-rss-submit/1.0' });
 var request = require('request-promise');
 var async = require('async');
 var q = require('q');
@@ -22,10 +21,22 @@ var logger = new (winston.Logger)({
 cmd
 	.option('-u, --user [string]', 'Username for reddit')
 	.option('-p, --pass [string]', 'Password for reddit')
+	.option('-k, --key [string]', 'Application key')
+	.option('-s, --secret [string]', 'Secret key')
 	.option('-t, --throttle [n]', 'Number of minutes between submissions', cfg.throttle)
 	.option('-c, --concurrent [n]', 'Number of concurrent api requests', cfg.concurrent)
 	.option('-v, --verbose', 'A value that can be increased', increaseVerbosity, 0)
 	.parse(process.argv);
+
+var reddit = new Snoocore({ userAgent: 'reddit-eraser/2.0', oauth: {
+	type: 'script',
+	key: cmd.key,
+	secret: cmd.secret,
+	username: cmd.user,
+	password: cmd.pass,
+	// make sure to set all the scopes you need.
+	scope: [ 'history', 'edit', 'identity' ]
+}});
 
 start();
 
@@ -108,12 +119,8 @@ function eraseAndDeleteComment(comment, cb){
 function start(){
 	if ( cmd.verbose ) logger.log('info', 'Starting with %d concurrency', cmd.concurrent);
 
-	reddit.login({
-		username: cmd.user,
-		password: cmd.pass
-	})
-		.then(function(loginData){
-			return reddit('/api/me.json').get();
+	reddit.auth().then(function(){
+			return reddit('/api/v1/me').get()
 		})
 		.then(function(me){
 			return getComments();
