@@ -48,3 +48,7 @@ concurrency is the number of simultaneous api requests sent to reddit.
 - c: concurrent requests
 
 LICENSE: MIT
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/chovy/reddit-eraser/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
