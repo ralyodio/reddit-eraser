@@ -10,6 +10,11 @@ reddit-eraser is a node.js script that will get the last 100 comments, and repla
 
 Other OS (windows, linux) should install from source found at http://nodejs.org
 
+## authorize access
+
+    navigate to reddit.com/prefs/apps/
+    create a new app and use http://localhost for the redirect uri
+
 ## install
 
     git clone git@github.com:chovy/reddit-eraser.git
@@ -20,7 +25,7 @@ Other OS (windows, linux) should install from source found at http://nodejs.org
     cp config.sample.json config.json
     
     # run from command line
-    ./index.js -u username -p password
+    ./index.js -u username -p password -k oauthkey -s oauthsecret
 
     # add a cronjob to periodically check
     crontab -e
