@@ -80,8 +80,9 @@ function eraseComment(comment){
 function deleteComment(comment){
 	return reddit('/api/del').post({
 		api_type: 'json',
-		id: comment.data.id
-	});
+		id: comment.data.name
+	})
+	.catch(console.error);
 }
 
 function eraseAndDeleteComment(comment, cb){
@@ -106,7 +107,7 @@ function eraseAndDeleteComment(comment, cb){
 	.then(function(comment){
 		deleteComment(comment)
 		.then(function(data){
-			if ( cmd.verbose ) logger.log('info', 'deleted comment id: %s', comment.data.id);
+			if ( cmd.verbose ) logger.log('info', 'deleted comment id: %s', comment.data.name);
 
 			cb();
 		});
