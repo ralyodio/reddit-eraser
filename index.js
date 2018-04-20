@@ -45,6 +45,21 @@ function increaseVerbosity(v, total) {
 	return total + 1;
 }
 
+function getPosts(before){
+	var where = {
+		sort: 'new',
+		limit: 100
+	};
+
+	return reddit('/user/'+cmd.user+'/submitted').listing(where)
+		.then(function(data){
+			//logger.log('info', data);
+			return data.children;
+		}).catch(function(err){
+			logger.error(err);
+		});
+}
+
 function getComments(before){
 	var where = {
 		sort: 'new',
@@ -66,10 +81,19 @@ function eraseComment(comment){
 			return data.value.joke;
 		})
 		.then(function(text){
+			if (!comment.data.is_self) {
+				return comment;
+			}
 			return reddit('/api/editusertext').post({
 					api_type: 'json',
 					text: text,
 					thing_id: comment.data.name
+				})
+				.then(function(res){
+					logger.log(res);
+				})
+				.catch(function(err) {
+					logger.error(err);
 				});
 		})
 		.catch(function(err){
@@ -82,7 +106,13 @@ function deleteComment(comment){
 		api_type: 'json',
 		id: comment.data.name
 	})
-	.catch(console.error);
+	.then(function(data){
+		logger.log(data);
+		return data;
+	})
+	.catch(function(err){
+		logger.error(err);
+	});
 }
 
 function eraseAndDeleteComment(comment, cb){
@@ -124,7 +154,7 @@ function start(){
 			return reddit('/api/v1/me').get()
 		})
 		.then(function(me){
-			return getComments();
+			return getPosts();
 		})
 		.then(function(comments){
 			var def = q.defer();
